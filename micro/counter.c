@@ -6,75 +6,49 @@
 #endif
 
 // Define o pino do sensor PIR
-#define PIR_SENSOR_PIN 8 // Ajuste para o pino correto da BitDogLab
-
-#ifndef LED_DELAY_MS
-#define LED_DELAY_MS 250
-#endif
 
 #define HIGH 1
 #define LOW 0
 
-// Inicializa o LED corretamente, seja na Pico normal ou Pico W
-int pico_led_init(void) {
-#if defined(PICO_DEFAULT_LED_PIN)
-    gpio_init(PICO_DEFAULT_LED_PIN);
-    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+int setup_pir_sensor(){
+    #ifndef PIR_SENSOR_PIN
+        #define PIR_SENSOR_PIN 8
+    #endif
+
+    gpio_init(PIR_SENSOR_PIN);
+    gpio_set_dir(PIR_SENSOR_PIN, GPIO_IN);
+
+    // Ativa pull-down para evitar ruídos
+    gpio_set_pulls(PIR_SENSOR_PIN, false, true);
+
+    printf("Inicializando sensor PIR...\n");
+    sleep_ms(1000);
     return PICO_OK;
-#elif defined(CYW43_WL_GPIO_LED_PIN)
-    return cyw43_arch_init();
-#endif
 }
 
-// Liga ou desliga o LED
-void pico_set_led(bool led_on) {
-#if defined(PICO_DEFAULT_LED_PIN)
-    gpio_put(PICO_DEFAULT_LED_PIN, led_on);
-#elif defined(CYW43_WL_GPIO_LED_PIN)
-    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, led_on);
-#endif
-}
 
 int main() {
     stdio_init_all();
-    int rc = pico_led_init();
-    hard_assert(rc == PICO_OK);
-    
-    if(!setup_wifi()){
-        printf("Erro ao inicializar o Wi-Fi!");
-    }
-    else{
-        for (size_t i = 0; i < 10; i++)
-        {
-           printf("ok");
-           sleep_ms(1000);
-        }
-        
-    }
-    
-    // Configura o pino do sensor PIR como entrada
-    gpio_init(PIR_SENSOR_PIN);
-    gpio_set_dir(PIR_SENSOR_PIN, GPIO_IN);
-    gpio_set_pulls(PIR_SENSOR_PIN, false, true);  // Ativa pull-down para evitar ruídos
-
-    printf("Inicializando sensor PIR...\n");
+    hard_assert(setup_pir_sensor() ==  PICO_OK);
+    hard_assert(setup_wifi() ==  PICO_OK);
 
     int last_state = LOW;
     
     while (true) {
         int pir_state = gpio_get(PIR_SENSOR_PIN);
 
-        if (pir_state == HIGH && last_state == LOW) {  // Apenas detecta a transição LOW -> HIGH
+          // Apenas detecta a transição LOW -> HIGH
+        if (pir_state == HIGH && last_state == LOW) {
             send_http_post();
             cyw43_arch_poll();
             printf("Someone moved!\n");
-            last_state = HIGH;  // Atualiza estado
-            sleep_ms(2500);  // Tempo de espera para evitar leituras repetidas
+            last_state = HIGH;
+            sleep_ms(2500);
         }
 
         if (pir_state == LOW) {
-            last_state = LOW;  // Reseta estado quando não há movimento
+            last_state = LOW;
         }
-        sleep_ms(100); // Aguarda um segundo antes de verificar novamente
+        sleep_ms(100);
     }
 }

@@ -89,6 +89,7 @@ int setup_wifi()
     // Obtém o endereço IP do dispositivo
     uint8_t *ip_address = (uint8_t *)&(cyw43_state.netif[0].ip_addr.addr);
     printf("IP address %d.%d.%d.%d\n", ip_address[0], ip_address[1], ip_address[2], ip_address[3]);
+    return PICO_OK;
 }
 
 // int main()
