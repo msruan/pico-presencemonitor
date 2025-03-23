@@ -65,6 +65,8 @@ int main() {
         int pir_state = gpio_get(PIR_SENSOR_PIN);
 
         if (pir_state == HIGH && last_state == LOW) {  // Apenas detecta a transição LOW -> HIGH
+            send_http_post();
+            cyw43_arch_poll();
             printf("Someone moved!\n");
             last_state = HIGH;  // Atualiza estado
             sleep_ms(2500);  // Tempo de espera para evitar leituras repetidas

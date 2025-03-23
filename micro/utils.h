@@ -1,8 +1,8 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
-
-#include <stdio.h>
-#include "pico/stdlib.h"
 #include "lwip/pbuf.h"
 #include "lwip/tcp.h"
 #include "cJSON.h"
@@ -12,11 +12,10 @@
 #define WIFI_PASSWORD "89banana"
 
 // Configurações de Wi-Fi (alterar para o IP onde está rodando o Express e a porta)
-#define SERVER_IP "0.0.0.0"
+#define SERVER_IP "192.168.0.12"
 #define SERVER_PORT 3000
 
-// Define o pino do LED vermelho do BitDogLab (ou LED configurado no seu hardware)
-#define PICO_DEFAULT_LED_PIN 13
+#define PICO_DEFAULT_LED_PIN 11
 
 // Configurações do TCP/IP
 char request_buffer[512];
@@ -37,16 +36,12 @@ err_t http_connected_callback(void *arg, struct tcp_pcb *pcb, err_t err)
 }
 
 
-void send_counter()
+void send_http_post()
 {
     snprintf(request_buffer, sizeof(request_buffer),
-             "POST /counter HTTP/1.1\r\n"
+             "POST /movements HTTP/1.1\r\n"
              "Host: " SERVER_IP "\r\n"
-             "Content-Type: application/json\r\n"
-             "Content-Length: %d\r\n"
-             "Connection: close\r\n\r\n"
-             "%s"
-            );
+             "Connection: close\r\n\r\n");
 
     ip_addr_t server_addr;
     ip4addr_aton(SERVER_IP, &server_addr);
