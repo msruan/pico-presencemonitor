@@ -1,0 +1,98 @@
+{
+  "id": 1,
+  "type": "timeseries",
+  "title": "Monitoramento de fluxo",
+  "gridPos": {
+    "x": 0,
+    "y": 0,
+    "h": 8,
+    "w": 12
+  },
+  "fieldConfig": {
+    "defaults": {
+      "custom": {
+        "drawStyle": "bars",
+        "lineInterpolation": "linear",
+        "barAlignment": 0,
+        "barWidthFactor": 0.6,
+        "lineWidth": 10,
+        "fillOpacity": 0,
+        "gradientMode": "none",
+        "spanNulls": false,
+        "insertNulls": false,
+        "showPoints": "auto",
+        "pointSize": 5,
+        "stacking": {
+          "mode": "none",
+          "group": "A"
+        },
+        "axisPlacement": "auto",
+        "axisLabel": "",
+        "axisColorMode": "series",
+        "axisBorderShow": false,
+        "scaleDistribution": {
+          "type": "linear"
+        },
+        "axisCenteredZero": false,
+        "hideFrom": {
+          "tooltip": false,
+          "viz": false,
+          "legend": false
+        },
+        "thresholdsStyle": {
+          "mode": "off"
+        },
+        "axisGridShow": false
+      },
+      "color": {
+        "mode": "palette-classic"
+      },
+      "mappings": [],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          {
+            "color": "green",
+            "value": null
+          },
+          {
+            "color": "red",
+            "value": 80
+          }
+        ]
+      },
+      "decimals": 0,
+      "displayName": "Movimentos"
+    },
+    "overrides": []
+  },
+  "transparent": true,
+  "pluginVersion": "11.5.2",
+  "targets": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "degqeg8knk5j4a"
+      },
+      "query": "from(bucket: \"home\")\r\n  |> range(start: -1h) // Ajuste para o intervalo desejado\r\n  |> filter(fn: (r) => r._measurement == \"motion_detected\")\r\n  |> filter(fn: (r) => r._field == \"detected\")\r\n  |> group(columns: [\"sensor\", \"location\"]) // Agrupar por sensor e localização\r\n  |> yield(name: \"motion_data\")\r\n",
+      "refId": "A"
+    }
+  ],
+  "datasource": {
+    "type": "influxdb",
+    "uid": "degqeg8knk5j4a"
+  },
+  "options": {
+    "tooltip": {
+      "mode": "single",
+      "sort": "none",
+      "hideZeros": false
+    },
+    "legend": {
+      "showLegend": true,
+      "displayMode": "list",
+      "placement": "right",
+      "calcs": []
+    }
+  }
+}
