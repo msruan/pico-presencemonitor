@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "./utils.h"
 #ifdef CYW43_WL_GPIO_LED_PIN
 #include "pico/cyw43_arch.h"
 #endif
@@ -39,11 +40,23 @@ int main() {
     int rc = pico_led_init();
     hard_assert(rc == PICO_OK);
     
+    if(!setup_wifi()){
+        printf("Erro ao inicializar o Wi-Fi!");
+    }
+    else{
+        for (size_t i = 0; i < 10; i++)
+        {
+           printf("ok");
+           sleep_ms(1000);
+        }
+        
+    }
+    
     // Configura o pino do sensor PIR como entrada
     gpio_init(PIR_SENSOR_PIN);
     gpio_set_dir(PIR_SENSOR_PIN, GPIO_IN);
     gpio_set_pulls(PIR_SENSOR_PIN, false, true);  // Ativa pull-down para evitar ruídos
-    
+
     printf("Inicializando sensor PIR...\n");
 
     int last_state = LOW;
