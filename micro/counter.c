@@ -41,7 +41,7 @@ int main() {
         if (pir_state == HIGH && last_state == LOW) {
             send_http_post();
             cyw43_arch_poll();
-            printf("Someone moved!\n");
+            printf("Alguém se mexeu!\n");
             last_state = HIGH;
             sleep_ms(2500);
         }

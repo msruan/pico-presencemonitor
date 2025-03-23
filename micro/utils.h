@@ -13,7 +13,11 @@
 
 // Configurações de Wi-Fi (alterar para o IP onde está rodando o Express e a porta)
 #define SERVER_IP "192.168.0.12"
-#define SERVER_PORT 3000
+#define SERVER_PORT 3001
+
+// Configurações do dashboard
+#define BOARD_ID "1"
+#define LOCATION "Bedroom"
 
 #define PICO_DEFAULT_LED_PIN 11
 
@@ -36,12 +40,23 @@ err_t http_connected_callback(void *arg, struct tcp_pcb *pcb, err_t err)
 }
 
 
+// Enviar requisição PUT
 void send_http_post()
 {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddStringToObject(json, "sensor_id", BOARD_ID);
+    cJSON_AddStringToObject(json, "location", LOCATION);
+    char *json_str = cJSON_Print(json);
+    cJSON_Delete(json);
+
     snprintf(request_buffer, sizeof(request_buffer),
-             "POST /movements HTTP/1.1\r\n"
+             "POST /motion HTTP/1.1\r\n"
              "Host: " SERVER_IP "\r\n"
-             "Connection: close\r\n\r\n");
+             "Content-Type: application/json\r\n"
+             "Content-Length: %d\r\n"
+             "Connection: close\r\n\r\n"
+             "%s",
+             (int)strlen(json_str), json_str);
 
     ip_addr_t server_addr;
     ip4addr_aton(SERVER_IP, &server_addr);
