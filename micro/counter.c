@@ -5,12 +5,14 @@
 #endif
 
 // Define o pino do sensor PIR
-#define PIR_SENSOR_PIN 16  // Ajuste para o pino correto da BitDogLab
-#define PIR2_SENSOR_PIN 8 // Ajuste para o pino correto da BitDogLab
+#define PIR_SENSOR_PIN 8 // Ajuste para o pino correto da BitDogLab
 
 #ifndef LED_DELAY_MS
 #define LED_DELAY_MS 250
 #endif
+
+#define HIGH 1
+#define LOW 0
 
 // Inicializa o LED corretamente, seja na Pico normal ou Pico W
 int pico_led_init(void) {
@@ -40,26 +42,24 @@ int main() {
     // Configura o pino do sensor PIR como entrada
     gpio_init(PIR_SENSOR_PIN);
     gpio_set_dir(PIR_SENSOR_PIN, GPIO_IN);
+    gpio_set_pulls(PIR_SENSOR_PIN, false, true);  // Ativa pull-down para evitar ruídos
     
     printf("Inicializando sensor PIR...\n");
+
+    int last_state = LOW;
     
     while (true) {
-        int pir_state = gpio_get(PIR_SENSOR_PIN); // Lê o estado do sensor
-        int pir2_state = gpio_get(PIR2_SENSOR_PIN); // Lê o estado do sensor
+        int pir_state = gpio_get(PIR_SENSOR_PIN);
 
-        if (pir2_state == 1) {
-            printf("Someone moved on left!\n");
+        if (pir_state == HIGH && last_state == LOW) {  // Apenas detecta a transição LOW -> HIGH
+            printf("Someone moved!\n");
+            last_state = HIGH;  // Atualiza estado
+            sleep_ms(2500);  // Tempo de espera para evitar leituras repetidas
         }
-        else{
-            printf("Monitoring left...\n");
+
+        if (pir_state == LOW) {
+            last_state = LOW;  // Reseta estado quando não há movimento
         }
-        
-        if (pir_state == 1) {
-            printf("Someone moved on right!\n");
-        }
-        else{
-            printf("Monitoring right...\n");
-        }
-        sleep_ms(1000); // Aguarda um segundo antes de verificar novamente
+        sleep_ms(100); // Aguarda um segundo antes de verificar novamente
     }
 }
